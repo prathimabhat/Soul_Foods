@@ -1,0 +1,6 @@
+@Soul_Foods_HostAddress = http://localhost:5081
+
+GET {{Soul_Foods_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
