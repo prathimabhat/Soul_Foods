@@ -12,8 +12,8 @@ using Soul_Foods.Data;
 namespace Soul_Foods.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231226050330_AllTables")]
-    partial class AllTables
+    [Migration("20231226085034_AddingFKForCartANDItems")]
+    partial class AddingFKForCartANDItems
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,21 @@ namespace Soul_Foods.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("CartItem", b =>
+                {
+                    b.Property<int>("CartsCartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemsItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CartsCartId", "ItemsItemId");
+
+                    b.HasIndex("ItemsItemId");
+
+                    b.ToTable("CartItem");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -235,7 +250,17 @@ namespace Soul_Foods.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CartId"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("RestaurantId")
+                        .HasColumnType("int");
+
                     b.HasKey("CartId");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("RestaurantId");
 
                     b.ToTable("Carts");
                 });
@@ -252,7 +277,12 @@ namespace Soul_Foods.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId");
 
                     b.ToTable("Categories");
                 });
@@ -264,6 +294,9 @@ namespace Soul_Foods.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemId"));
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Ingrdients")
                         .IsRequired()
@@ -277,7 +310,14 @@ namespace Soul_Foods.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("int");
+
                     b.HasKey("ItemId");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("RestaurantId");
 
                     b.ToTable("Items");
                 });
@@ -301,6 +341,21 @@ namespace Soul_Foods.Migrations
                     b.HasKey("RestaurantId");
 
                     b.ToTable("Restaurants");
+                });
+
+            modelBuilder.Entity("CartItem", b =>
+                {
+                    b.HasOne("Soul_Foods.Models.Cart", null)
+                        .WithMany()
+                        .HasForeignKey("CartsCartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Soul_Foods.Models.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -352,6 +407,61 @@ namespace Soul_Foods.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Soul_Foods.Models.Cart", b =>
+                {
+                    b.HasOne("Soul_Foods.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("Soul_Foods.Models.Restaurant", "Restaurant")
+                        .WithMany()
+                        .HasForeignKey("RestaurantId");
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Soul_Foods.Models.Categories", b =>
+                {
+                    b.HasOne("Soul_Foods.Models.Restaurant", "Restaurant")
+                        .WithMany("Categories")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Soul_Foods.Models.Item", b =>
+                {
+                    b.HasOne("Soul_Foods.Models.Categories", "Category")
+                        .WithMany("Items")
+                        .HasForeignKey("CategoryId");
+
+                    b.HasOne("Soul_Foods.Models.Restaurant", "Restaurant")
+                        .WithMany("Items")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("Soul_Foods.Models.Categories", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("Soul_Foods.Models.Restaurant", b =>
+                {
+                    b.Navigation("Categories");
+
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

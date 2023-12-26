@@ -13,6 +13,7 @@ namespace Soul_Foods.Data
             base.OnModelCreating(builder);
         }
 
+
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Item> Items { get; set; }
